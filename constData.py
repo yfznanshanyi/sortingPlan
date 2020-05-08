@@ -71,21 +71,26 @@ class CONSTDATA(object):
     loading_berth_num = short_side_loading_berth_num + long_side_loading_berth_num
     NC_loading_berth_num = short_side_NC_loading_berth_num + long_side_NC_loading_berth_num
 
+
+    # distance
+    before_main_line_distance = 122.8412
     # big flow
-    sorting_sation_travel_level1_combine_rate_ub = 1.6
+    sorting_sation_loads_ub = 30000
+
+    sorting_sation_travel_level1_combine_rate_ub = 1.5
     sorting_sation_travel_level1_split_rate_lb = 2.0
     sorting_sation_travel_level1_num_ub = 2
 
-    sorting_sation_travel_level2_combine_rate_ub = 1.0
-    sorting_sation_travel_level2_split_rate_lb = 1.8
+    sorting_sation_travel_level2_combine_rate_ub = 1.2
+    sorting_sation_travel_level2_split_rate_lb = 2.0
     sorting_sation_travel_level2_num_ub = 3
 
-    sorting_sation_travel_level3_combine_rate_ub = 1.0
-    sorting_sation_travel_level3_split_rate_lb = 1.5
+    sorting_sation_travel_level3_combine_rate_ub = 1.2
+    sorting_sation_travel_level3_split_rate_lb = 2.0
     sorting_sation_travel_level3_num_ub = 2
 
 
-    loading_berth_lb = 80000
+    loading_berth_ub = 80000
     loading_berth_num_ub = 2
 
     # travel number

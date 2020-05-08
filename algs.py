@@ -60,13 +60,17 @@ class ALGS(object):
         loading_berth_flowBands = []
         label = 1
         for flowBand in temp_zone_flowBands:
-            temp = flowBand.set_combined_flowBands(shift_travel_level_mean_loads,
+            # temp = flowBand.set_combined_flowBands(shift_travel_level_mean_loads,
+            #                                        CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
+            temp = flowBand.set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
                                                    CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
             temp.sort(reverse=True)
             label = label + len(temp)
             temp = self.sort_flowBand_list(temp, label % 2)
             for flowBand in temp:
-                ttemp = flowBand.split_big_flow(shift_travel_level_mean_loads,
+                # ttemp = flowBand.split_big_flow(shift_travel_level_mean_loads,
+                #                                 CONSTDATA.sorting_sation_travel_level1_num_ub)
+                ttemp = flowBand.split_big_flow(CONSTDATA.sorting_sation_loads_ub,
                                                 CONSTDATA.sorting_sation_travel_level1_num_ub)
                 if ttemp == -1:
                     sorting_sation_flowBands.append(flowBand)
@@ -128,10 +132,14 @@ class ALGS(object):
         for flowBand in temp_travel_level23_zone_flowBands:
             travel_level = flowBand.flow_list[0].travel_level
             if travel_level == travel_level2:
-                temp = flowBand.set_combined_flowBands(shift_travel_level1_mean_loads,
+                # temp = flowBand.set_combined_flowBands(shift_travel_level1_mean_loads,
+                #                                        CONSTDATA.sorting_sation_travel_level2_combine_rate_ub)
+                temp = flowBand.set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
                                                        CONSTDATA.sorting_sation_travel_level2_combine_rate_ub)
             else:
-                temp = flowBand.set_combined_flowBands(shift_travel_level1_mean_loads,
+                # temp = flowBand.set_combined_flowBands(shift_travel_level1_mean_loads,
+                #                                        CONSTDATA.sorting_sation_travel_level3_combine_rate_ub)
+                temp = flowBand.set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
                                                        CONSTDATA.sorting_sation_travel_level3_combine_rate_ub)
             temp.sort(reverse=True)
             label = label + len(temp)
@@ -139,10 +147,14 @@ class ALGS(object):
             for flowBand in temp:
                 travel_level = flowBand.flow_list[0].travel_level
                 if travel_level == travel_level2:
-                    ttemp = flowBand.split_big_flow(shift_travel_level1_mean_loads,
+                    # ttemp = flowBand.split_big_flow(shift_travel_level1_mean_loads,
+                    #                                 CONSTDATA.sorting_sation_travel_level2_num_ub)
+                    ttemp = flowBand.split_big_flow(CONSTDATA.sorting_sation_loads_ub,
                                                     CONSTDATA.sorting_sation_travel_level2_num_ub)
                 else:
-                    ttemp = flowBand.split_big_flow(shift_travel_level1_mean_loads,
+                    # ttemp = flowBand.split_big_flow(shift_travel_level1_mean_loads,
+                    #                                 CONSTDATA.sorting_sation_travel_level3_num_ub)
+                    ttemp = flowBand.split_big_flow(CONSTDATA.sorting_sation_loads_ub,
                                                     CONSTDATA.sorting_sation_travel_level3_num_ub)
                 if ttemp == -1:
                     sorting_sation_flowBands.append(flowBand)

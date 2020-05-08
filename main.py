@@ -23,9 +23,9 @@ if __name__ == '__main__':
     # dynamic loading berths
     dynamicBerths = DYNAMICBERTHS(input_data)
     dynamicBerths.set_day_sort_plan()
-    dynamicBerths.set_compare_fit()
-    dynamicBerths.set_compare_encoding()
-    # dynamicBerths.set_no_NC_figure()
+    dynamicBerths.set_compare_fit(True)
+    dynamicBerths.set_compare_encoding(True)
+    dynamicBerths.set_no_NC_figure()
     dynamicBerths.analysis_no_NC_zone_loads()
 
 

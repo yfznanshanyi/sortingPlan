@@ -225,8 +225,28 @@ class DYNAMICBERTHS(object):
         self.comprea_info_encoding['lb_coor'] = before_lb_coor
         self.comprea_info_encoding['ss_2_sa_dist'] = before_ss_2_sa_dist
         self.comprea_info_encoding['sa_2_lb_dist'] = before_sa_2_lb_dist
+
+        temp_comprea_info_encoding = copy.copy(self.comprea_info_encoding)
+        temp_date = copy.copy(list(set(date)))
+        all_date = 'all date'
+        temp_date.remove(all_date)
+        temp_date.sort()
+        all_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date']==all_date])
+        all_df.rename(columns={'loads':'static_loads',
+                               'ss_index':'static_ss_index','ss_coor':'static_ss_coor',
+                               'main_line_dist':'static_main_line_dist',
+                               'lb_index':'static_lb_index','lb_coor':'static_lb_coor',
+                               'ss_2_sa_dist':'static_ss_2_sa_dist',
+                               'sa_2_lb_dist':'static_sa_2_lb_dist'
+                               },inplace=True)
+        comprea_info_encoding = pd.DataFrame()
+        for d in temp_date:
+            temp_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date']==d])
+            temp_df = pd.merge(temp_df,all_df,how='left',on=['destination','travel_level','zone'])
+            comprea_info_encoding = comprea_info_encoding.append(temp_df)
+        comprea_info_encoding.reset_index(drop=True,inplace=True)
         if label == True:
-            self.comprea_info_encoding.to_csv(self.data.output_filefolder + 'comprea_info_encoding.csv', index=False,
+            comprea_info_encoding.to_csv(self.data.output_filefolder + 'comprea_info_encoding.csv', index=False,
                                               encoding='gbk')
         self.set_date_loads()
         return self.comprea_info_encoding
@@ -243,8 +263,10 @@ class DYNAMICBERTHS(object):
 
         date = [set_date(str(d)) for d in self.comprea_info_fit["date"]]
         loads = copy.copy(self.loads_list)
+        loads = [_/CONSTDATA.kg for _ in loads]
         mean_loads = np.mean(loads[:-1])
         mean_loads_list = [mean_loads for _ in date]
+        fixed = [_*CONSTDATA.before_main_line_distance for _ in loads]
         before_main = self.comprea_info_fit["before main_line"]
         before_ss_2_sa = self.comprea_info_fit["before sorting_sation_2_storage_area"]
         before_sa_2_lb = self.comprea_info_fit["before storage_area_2_loading_berth"]
@@ -271,28 +293,29 @@ class DYNAMICBERTHS(object):
         ax1.legend(loc='best', fontsize=12)
         ax1.set_title('loads duing ' + date[0] + '-' + date[-2], fontsize=12)
         # ax1.set_xlabel('date',fontsize=12)
-        ax1.set_ylabel('loads', fontsize=12)
+        ax1.set_ylabel('loads (t)', fontsize=12)
 
-        ax2.plot(date, before_main, 'ko-', label='dynamic', linewidth=2.0, ms=1)
-        ax2.plot(date, after_main, 'ro--', label='static', linewidth=2.0, ms=1)
+        ax2.plot(date, before_main, 'ro-', label='dynamic', linewidth=2.0, ms=1)
+        ax2.plot(date, after_main, 'ko--', label='static', linewidth=2.0, ms=1)
+        ax2.plot(date, fixed, 'go--', label='fixed', linewidth=2.0, ms=1)
         ax2.legend(loc='best', fontsize=12)
         ax2.set_title('main line distance', fontsize=12)
         # ax2.set_xlabel('date',fontsize=12)
-        ax2.set_ylabel('distance', fontsize=12)
+        ax2.set_ylabel('weight_distance (t*m)', fontsize=12)
 
-        ax3.plot(date, before_ss_2_sa, 'ko-', label='dynamic', linewidth=2.0, ms=1)
-        ax3.plot(date, after_ss_2_sa, 'ro--', label='static', linewidth=2.0, ms=1)
+        ax3.plot(date, before_ss_2_sa, 'ro-', label='dynamic', linewidth=2.0, ms=1)
+        ax3.plot(date, after_ss_2_sa, 'ko--', label='static', linewidth=2.0, ms=1)
         ax3.legend(loc='best', fontsize=12)
         ax3.set_title('sorting sation to storage area distance', fontsize=12)
         # ax3.set_xlabel('date',fontsize=12)
-        ax3.set_ylabel('distance', fontsize=12)
+        ax3.set_ylabel('distance (m)', fontsize=12)
 
-        ax4.plot(date, before_sa_2_lb, 'ko-', label='dynamic', linewidth=2.0, ms=1)
-        ax4.plot(date, after_sa_2_lb, 'ro--', label='static', linewidth=2.0, ms=1)
+        ax4.plot(date, before_sa_2_lb, 'ro-', label='dynamic', linewidth=2.0, ms=1)
+        ax4.plot(date, after_sa_2_lb, 'ko--', label='static', linewidth=2.0, ms=1)
         ax4.legend(loc='best', fontsize=12)
         ax4.set_title('storage area to loading berth distance', fontsize=12)
         # ax4.set_xlabel('date',fontsize=12)
-        ax4.set_ylabel('ditance', fontsize=12)
+        ax4.set_ylabel('ditance (m)', fontsize=12)
 
         plt.show()
 

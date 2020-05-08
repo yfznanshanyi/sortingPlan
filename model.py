@@ -121,12 +121,12 @@ class MODEL(object):
     def set_main_line_list(self):
         self.main_line_distance_list = []
         for index in self.sorting_sation_set.short_side_index:
-            coordinate1 = CONSTDATA.sorting_sation_short_side_begin_coordinate
+            coordinate1 = CONSTDATA.sorting_sation_short_side_end_coordinate
             coordinate2 = self.sorting_sation_set.sorting_sations[index].coordinate
             distance = coordinate1.get_dist(coordinate2)
             self.main_line_distance_list.append(distance)
         for index in self.sorting_sation_set.long_side_index:
-            coordinate1 = CONSTDATA.sorting_sation_long_side_begin_coordinate
+            coordinate1 = CONSTDATA.sorting_sation_long_side_end_coordinate
             coordinate2 = self.sorting_sation_set.sorting_sations[index].coordinate
             distance = coordinate1.get_dist(coordinate2)
             self.main_line_distance_list.append(distance)
@@ -199,15 +199,15 @@ class MODEL(object):
     def cost_main_line(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_sorting_sation'].items():
-            weight = flowBand.loads * (1.0 - NC_rate) / CONSTDATA.kg
-            distance = self.main_line_distance_list[index]
+            weight = flowBand.get_loads() * (1.0 - NC_rate) / CONSTDATA.kg
+            distance = self.main_line_distance_list[index] + CONSTDATA.before_main_line_distance
             weight_distance = weight_distance + weight * distance
         return weight_distance
 
     def cost_sorting_sation_2_storage_area(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, sorting_sation_index in encoding['encoding_flow_sorting_sation'].items():
-            weight = flowBand.loads * (1.0 - NC_rate)
+            weight = flowBand.get_loads() * (1.0 - NC_rate)
             pallet = weight / CONSTDATA.pallets_weight
             # print(flowBand.flow_list[0].destination)
             storage_area_index = encoding['encoding_flow_loading_berth'][flowBand]
@@ -219,7 +219,7 @@ class MODEL(object):
     def cost_storage_area_2_loading_berth(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.loads * (1 - NC_rate)
+            weight = flowBand.get_loads() * (1 - NC_rate)
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.storage_area_2_loading_berth_distance_matrix[index][index]
             weight_distance = weight_distance + pallet * distance
@@ -229,7 +229,7 @@ class MODEL(object):
     def cost_NC_loading_berth_2_storage_area(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.loads * NC_rate
+            weight = flowBand.get_loads() * NC_rate
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.NC_loading_berth_2_storage_area_distance_list[index]
             weight_distance = weight_distance + pallet * distance
@@ -239,7 +239,7 @@ class MODEL(object):
     def cost_NC_storage_area_2_loading_berth(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.loads * NC_rate
+            weight = flowBand.get_loads() * NC_rate
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.storage_area_2_loading_berth_distance_matrix[index][index]
             weight_distance = weight_distance + pallet * distance

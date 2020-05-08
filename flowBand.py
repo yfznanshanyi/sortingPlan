@@ -25,6 +25,10 @@ class FLOWBAND(object):
         self.set_loads()
         self.set_flow_dict()
 
+    def get_loads(self):
+        self.set_loads()
+        return self.loads
+
     # 单个大流向分解
     def split_big_flow(self, sorting_sation_weight, sorting_sation_num_ub):
         if len(self.flow_list) == 1:
@@ -35,7 +39,7 @@ class FLOWBAND(object):
             elif split_num > sorting_sation_num_ub:
                 split_num = sorting_sation_num_ub
             else:
-                split_num = math.ceil(split_num)
+                split_num = math.floor(split_num)
             mean_loads = self.loads / split_num
             temp_flowBands_list = []
             for i in range(split_num):
