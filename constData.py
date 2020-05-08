@@ -16,7 +16,7 @@ class CONSTDATA(object):
     pallets_length = 1.2
     pallets_width = 1.0
     # kilogram
-    kg = 1000.0
+    kg_t = 1000.0
     # man efficiency
     x_max = 75
     x_min = 0
@@ -24,6 +24,7 @@ class CONSTDATA(object):
     y_min = 0
 
     # sorting sation
+    sorting_sation_width = 1.2
     short_side_sorting_sation_num = 31
     sorting_sation_short_side_begin_coordinate = COORDINATE(18.0, 12.5)
     sorting_sation_short_side_end_coordinate = COORDINATE(96.0, 12.5)

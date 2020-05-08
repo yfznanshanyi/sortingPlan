@@ -123,12 +123,12 @@ class MODEL(object):
         for index in self.sorting_sation_set.short_side_index:
             coordinate1 = CONSTDATA.sorting_sation_short_side_end_coordinate
             coordinate2 = self.sorting_sation_set.sorting_sations[index].coordinate
-            distance = coordinate1.get_dist(coordinate2)
+            distance = coordinate1.get_dist(coordinate2) + CONSTDATA.sorting_sation_width / 2
             self.main_line_distance_list.append(distance)
         for index in self.sorting_sation_set.long_side_index:
             coordinate1 = CONSTDATA.sorting_sation_long_side_end_coordinate
             coordinate2 = self.sorting_sation_set.sorting_sations[index].coordinate
-            distance = coordinate1.get_dist(coordinate2)
+            distance = coordinate1.get_dist(coordinate2) + CONSTDATA.sorting_sation_width / 2
             self.main_line_distance_list.append(distance)
         return self.main_line_distance_list
 
@@ -199,7 +199,7 @@ class MODEL(object):
     def cost_main_line(self, encoding, NC_rate=0.0):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_sorting_sation'].items():
-            weight = flowBand.get_loads() * (1.0 - NC_rate) / CONSTDATA.kg
+            weight = flowBand.get_loads() * (1.0 - NC_rate) / CONSTDATA.kg_t
             distance = self.main_line_distance_list[index] + CONSTDATA.before_main_line_distance
             weight_distance = weight_distance + weight * distance
         return weight_distance

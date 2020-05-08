@@ -92,6 +92,61 @@ class ALGS(object):
                 encoding['encoding_flow_loading_berth'][flowBand] = loading_berth_index
         return encoding
 
+    def set_NC_big_shift_travel_level1(self):
+        shift = self.model.flow_info.big_shift
+        shift_mean_loads = self.model.shift_flowBands_mean_loads[shift]
+        travel_level = '一级运输'
+        shift_travel_level_mean_loads = self.model.shift_travel_level_flowBands_mean_loads[shift][travel_level]
+        rate = self.model.shift_travel_level_flowBands_all_loads[shift][travel_level] / \
+               self.model.shift_flowBands_all_loads[shift]
+        max_sorting_sation_num = CONSTDATA.short_side_sorting_sation_num
+        theory_soring_sation_num = round(CONSTDATA.sorting_sation_num * rate, 0)
+        max_loading_berth_num = CONSTDATA.short_side_loading_berth_num
+        theory_loading_berth_num = round(CONSTDATA.loading_berth_num * rate, 0)
+
+        temp_flows_list = copy.copy(self.model.shift_travel_level_flowBands[shift][travel_level])
+        temp_zone_flowBands = []
+        for zone, flow_list in self.model.shift_travel_level_zone_flowBands[shift][travel_level].items():
+            if len(flow_list) ==0:
+                continue
+            temp_zone_flowBands.append(FLOWBAND(copy.copy(flow_list)))
+        temp_zone_flowBands.sort(key=lambda x: x.mean_loads, reverse=True)
+        sorting_sation_flowBands = []
+        loading_berth_flowBands = []
+        label = 1
+        for flowBand in temp_zone_flowBands:
+            # temp = flowBand.set_combined_flowBands(shift_travel_level_mean_loads,
+            #                                        CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
+            temp = flowBand.set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
+                                                   CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
+            temp.sort(reverse=True)
+            label = label + len(temp)
+            temp = self.sort_flowBand_list(temp, label % 2)
+            for flowBand in temp:
+                # ttemp = flowBand.split_big_flow(shift_travel_level_mean_loads,
+                #                                 CONSTDATA.sorting_sation_travel_level1_num_ub)
+                ttemp = flowBand.split_big_flow(CONSTDATA.sorting_sation_loads_ub,
+                                                CONSTDATA.sorting_sation_travel_level1_num_ub)
+                if ttemp == -1:
+                    sorting_sation_flowBands.append(flowBand)
+                    loading_berth_flowBands.append(flowBand)
+                else:
+                    sorting_sation_flowBands.extend(ttemp)
+                    loading_berth_flowBands.append(ttemp)
+        # set algorithm encoding
+        encoding = copy.copy(self.model.encoding)
+        for flowBand, sorting_sation_index in zip(sorting_sation_flowBands,
+                                                  self.model.sorting_sation_set.short_side_index):
+            encoding['encoding_flow_sorting_sation'][flowBand] = sorting_sation_index
+        for flowBand, loading_berth_index in zip(loading_berth_flowBands,
+                                                 self.model.loading_berth_set.short_side_index):
+            if type(flowBand) == list:
+                for subflowBand in flowBand:
+                    encoding['encoding_flow_loading_berth'][subflowBand] = loading_berth_index
+            else:
+                encoding['encoding_flow_loading_berth'][flowBand] = loading_berth_index
+        return encoding
+
     # 设置大班次二三级干线流向
     def set_big_shift_travel_level23(self):
         shift = self.model.flow_info.big_shift

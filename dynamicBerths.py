@@ -231,23 +231,41 @@ class DYNAMICBERTHS(object):
         all_date = 'all date'
         temp_date.remove(all_date)
         temp_date.sort()
-        all_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date']==all_date])
-        all_df.rename(columns={'loads':'static_loads',
-                               'ss_index':'static_ss_index','ss_coor':'static_ss_coor',
-                               'main_line_dist':'static_main_line_dist',
-                               'lb_index':'static_lb_index','lb_coor':'static_lb_coor',
-                               'ss_2_sa_dist':'static_ss_2_sa_dist',
-                               'sa_2_lb_dist':'static_sa_2_lb_dist'
-                               },inplace=True)
+        all_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date'] == all_date])
+        all_df.rename(columns={'loads': 'static_loads','date': 'static',
+                               'ss_index': 'static_ss_index', 'ss_coor': 'static_ss_coor',
+                               'main_line_dist': 'static_main_line_dist',
+                               'lb_index': 'static_lb_index', 'lb_coor': 'static_lb_coor',
+                               'ss_2_sa_dist': 'static_ss_2_sa_dist',
+                               'sa_2_lb_dist': 'static_sa_2_lb_dist'
+                               }, inplace=True)
+        all_df.drop(columns='zone',inplace=True)
         comprea_info_encoding = pd.DataFrame()
+
+        def get_list(s):
+            return list(s)
+
+        all_df = all_df.groupby(['static', 'travel_level', 'destination']). \
+            agg({'static_loads': 'sum',
+                 'static_ss_index': get_list, 'static_ss_coor': get_list,
+                 'static_lb_index': get_list, 'static_lb_coor': get_list,
+                 'static_main_line_dist': get_list,
+                 'static_ss_2_sa_dist': get_list, 'static_sa_2_lb_dist': get_list}).reset_index()
+
         for d in temp_date:
-            temp_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date']==d])
-            temp_df = pd.merge(temp_df,all_df,how='left',on=['destination','travel_level','zone'])
+            temp_df = copy.copy(temp_comprea_info_encoding[temp_comprea_info_encoding['date'] == d])
+            temp_df = temp_df.groupby(['date', 'travel_level', 'zone', 'destination']). \
+                agg({'loads': get_list,
+                     'ss_index': get_list, 'ss_coor': get_list,
+                     'lb_index': get_list, 'lb_coor': get_list,
+                     'main_line_dist': get_list,
+                     'ss_2_sa_dist': get_list, 'sa_2_lb_dist': get_list}).reset_index()
+            temp_df = pd.merge(temp_df, all_df, how='left', on=['destination', 'travel_level'])
             comprea_info_encoding = comprea_info_encoding.append(temp_df)
-        comprea_info_encoding.reset_index(drop=True,inplace=True)
+        comprea_info_encoding.reset_index(drop=True, inplace=True)
         if label == True:
             comprea_info_encoding.to_csv(self.data.output_filefolder + 'comprea_info_encoding.csv', index=False,
-                                              encoding='gbk')
+                                         encoding='gbk')
         self.set_date_loads()
         return self.comprea_info_encoding
 
@@ -263,10 +281,10 @@ class DYNAMICBERTHS(object):
 
         date = [set_date(str(d)) for d in self.comprea_info_fit["date"]]
         loads = copy.copy(self.loads_list)
-        loads = [_/CONSTDATA.kg for _ in loads]
+        loads = [_ / CONSTDATA.kg_t for _ in loads]
         mean_loads = np.mean(loads[:-1])
         mean_loads_list = [mean_loads for _ in date]
-        fixed = [_*CONSTDATA.before_main_line_distance for _ in loads]
+        fixed = [_ * CONSTDATA.before_main_line_distance for _ in loads]
         before_main = self.comprea_info_fit["before main_line"]
         before_ss_2_sa = self.comprea_info_fit["before sorting_sation_2_storage_area"]
         before_sa_2_lb = self.comprea_info_fit["before storage_area_2_loading_berth"]
@@ -319,7 +337,7 @@ class DYNAMICBERTHS(object):
 
         plt.show()
 
-    def analysis_no_NC_zone_loads(self):
+    def plot_no_NC_zone_loads(self):
         temp_zone_loads = pd.pivot_table(self.comprea_info_encoding, values='loads',
                                          index=['date', 'travel_level', 'zone'],
                                          fill_value=0, aggfunc='sum')
@@ -383,14 +401,14 @@ class DYNAMICBERTHS(object):
             apply(lambda x: sum(list(x)) / len(list(x)))
 
         def set_describe(r, tl, z, l):
-            s = str(round(r*100,2)) + '%' + tl + ' ' + z + ' ' + str(round(l, 2))
+            s = str(round(r * 100, 2)) + '%' + tl + ' ' + z + ' ' + str(round(l, 2))
             return s
 
         travel_level_zone_loads['describe'] = travel_level_zone_loads. \
             apply(lambda row: set_describe(row['loads_rate'], row['travel_level'], row['zone'], row['mean_loads']),
                   axis=1)
 
-        travel_level_zone_loads.to_csv('travel_level_zone_loads.csv', index=False, encoding='gbk')
+        # travel_level_zone_loads.to_csv(self.data.output_filefolder+'travel_level_zone_loads.csv', index=False, encoding='gbk')
 
         # figure
         plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -417,7 +435,7 @@ class DYNAMICBERTHS(object):
         参数arrowprops以字典形式传递，用于控制箭头的诸多属性，如箭头类型(arrowstyle)、箭头连接时的弯曲程度(connectionstyle)
         """
         kw = dict(xycoords='data', textcoords='data',
-                  arrowprops=dict(arrowstyle="-"),#connectionstyle="arc,angleA=-90,angleB=0,armA=30,armB=30,rad=5"),
+                  arrowprops=dict(arrowstyle="-"),  # connectionstyle="arc,angleA=-90,angleB=0,armA=30,armB=30,rad=5"),
                   bbox=bbox_props, zorder=0, va="center")
 
         for i, p in enumerate(wedges):  # 遍历每一个扇形
@@ -452,4 +470,36 @@ class DYNAMICBERTHS(object):
 
         ax.set_title("travel level zone loads rate", fontsize=25)
 
+        plt.show()
+
+    def analysis_no_NC_zone_loads(self):
+        temp_zone_loads = pd.pivot_table(self.comprea_info_encoding, values='loads',
+                                         index=['date', 'travel_level', 'zone'],
+                                         fill_value=0, aggfunc='sum')
+        temp_zone_loads.reset_index(inplace=True)
+        temp_zone_loads.sort_values(by=['loads'], ascending=False, inplace=True)
+        temp_zone_loads.sort_values(by=['date'], ascending=True, inplace=True)
+        temp_travel_level1_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level']=='一级运输'])
+        temp_travel_level2_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level']=='二级运输'])
+        temp_travel_level3_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level']=='三级运输'])
+        temp_travel_level3_zone_loads['zone'] = ''#'K775Y&755Y')
+        temp_zone_loads = \
+            pd.concat([temp_travel_level1_zone_loads,temp_travel_level2_zone_loads,temp_travel_level3_zone_loads])
+        temp_zone_loads['zone'] = temp_zone_loads['travel_level']+temp_zone_loads['zone']
+
+        date_list = list(temp_zone_loads['date'].unique())
+        zone_list = list(temp_zone_loads['zone'].unique())
+
+        temp_zone_loads = pd.pivot_table(temp_zone_loads,values='loads',index='date',columns='zone',
+                                         fill_value=0,aggfunc='sum').reset_index()
+        plt.rcParams['font.sans-serif'] = ['SimHei']
+        plt.rcParams['axes.unicode_minus'] = False
+        for zone in zone_list:
+            loads = copy.copy(list(temp_zone_loads[zone]))
+            loads = [_ / CONSTDATA.kg_t for _ in loads ]
+            plt.plot(date_list[:-1],loads[:-1],label=zone,linewidth=2.0,ms=1.0)
+        plt.yticks(fontsize=15)
+        plt.legend(loc='best', fontsize=15)
+        plt.ylabel('loads (t)', fontsize=15)
+        plt.title('travel level zone loads', fontsize=20)
         plt.show()
