@@ -1,13 +1,19 @@
 import copy
 import pandas as pd
+import numpy as np
+
+from constData import CONSTDATA
 
 
 class FLOW(object):
-    def __init__(self, destination, travele_level, loads, zone):  # , trunk_num):
+    def __init__(self, destination, travele_level, loads, zone, NC_rate=0.0):  # , trunk_num):
         self.destination = destination
         self.travel_level = travele_level
         self.loads = loads
         self.zone = zone
+        self.NC_rate = NC_rate
+        self.loads_no_NC = self.loads * (1.0 - self.NC_rate)
+        self.loads_NC = self.loads * self.NC_rate
         # self.trunk_num = trunk_num
 
     def __lt__(self, other):
@@ -36,10 +42,11 @@ class FLOW(object):
 
 
 class FLOWINFO(object):
-    def __init__(self, input_date,split_label):
+    def __init__(self, input_date, split_label):
         self.input_data = copy.copy(input_date)
         self.date_list = []
         self.shift_list = []
+        self.destination_list = []
         self.travel_level_list = []
         self.zone_list = []
         self.travel_level_zone_dict = {}
@@ -47,7 +54,9 @@ class FLOWINFO(object):
         self.travel_level_zone_destination_dict = {}
         # self.shift_travel_level_flow_dict = {}
         self.flows_used_dict = {}
+        self.flows_used_NC_rate_dict = {}
         self.shift_travel_level_zone = {}
+        self.date_shift_destination_NC_rate = {}
         self.set_basic_data()
 
         # set split rate
@@ -77,6 +86,10 @@ class FLOWINFO(object):
         self.zone_list.sort()
         # print('zone list: ', self.zone_list)
         return self.shift_list
+
+    def set_destination_list(self):
+        self.destination_list = list(self.input_data.loading_table_out['到达网点'].unique())
+        return self.destination_list
 
     def set_travel_level_list(self):
         self.travel_level_list = list(self.input_data.loading_table_out['运输等级'].unique())
@@ -133,15 +146,54 @@ class FLOWINFO(object):
             self.shift_travel_level_zone[item[0]][item[1]].append(item[2])
         return self.shift_travel_level_zone
 
+    def generate_date_shift_destination_NC_rate(self):
+        df_NC_rate = pd.DataFrame()
+        temp_date = []
+        temp_shift = []
+        temp_destination = []
+        temp_NC_rate = []
+        for date in self.date_list:
+            for shift in self.shift_list:
+                for destination in self.destination_list:
+                    temp_date.append(date)
+                    temp_shift.append(shift)
+                    temp_destination.append(destination)
+                    temp_NC_rate.append(copy.copy(np.random.uniform(0.0, CONSTDATA.NC_rate_up_bound)))
+        df_NC_rate['date'] = temp_date
+        df_NC_rate['shift'] = temp_shift
+        df_NC_rate['destination'] = temp_destination
+        df_NC_rate['NC_rate'] = temp_NC_rate
+        df_NC_rate.to_csv('df_NC_rate.csv',index=False)
+        return df_NC_rate
+
+    def set_date_shift_destination_NC_rate(self):
+        self.date_shift_destination_NC_rate = {}
+        for date in self.date_list:
+            self.date_shift_destination_NC_rate[date] = {}
+            for shift in self.shift_list:
+                self.date_shift_destination_NC_rate[date][shift] = {}
+                for destination in self.destination_list:
+                    self.date_shift_destination_NC_rate[date][shift][destination] = 0.0
+        for r,c in self.input_data.NC_rate.iterrows():
+            date = c['date']
+            shift = c['shift']
+            destination = c['destination']
+            NC_rate = c['NC_rate']
+            self.date_shift_destination_NC_rate[date][shift][destination] = NC_rate
+        return self.date_shift_destination_NC_rate
+
     def set_basic_data(self):
         self.set_date_list()
         self.set_shift_list()
         self.set_zone_list()
+        self.set_destination_list()
         self.set_travel_level_list()
         self.set_travel_level_zone_dict()
         self.set_travel_level_zone_destination_dict()
         self.set_travel_level_destination_zone_dict()
         self.set_shift_travel_level_zone()
+        # self.generate_date_shift_destination_NC_rate()
+        self.set_date_shift_destination_NC_rate()
 
     def set_big_shift_split_rate(self):
         # default shift
@@ -174,10 +226,13 @@ class FLOWINFO(object):
 
     def set_flows_used_dict(self):
         self.flows_used_dict = {}
+        self.flows_used_NC_rate_dict = {}
         for shift in self.shift_list:
             self.flows_used_dict[shift] = {}
+            self.flows_used_NC_rate_dict[shift] = {}
             for travel_level in self.travel_level_list:
                 self.flows_used_dict[shift][travel_level] = {}
+                self.flows_used_NC_rate_dict[shift][travel_level] = {}
         for date in self.date_list:
             for shift in self.shift_list:
                 for travel_level in self.travel_level_list:
@@ -185,8 +240,14 @@ class FLOWINFO(object):
                         if destination not in self.flows_used_dict[shift][travel_level].keys():
                             self.flows_used_dict[shift][travel_level][destination] = \
                                 self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]
+                            self.flows_used_NC_rate_dict[shift][destination] = \
+                                self.date_shift_destination_NC_rate[date][shift][destination]
                         else:
+                            orirgin_loads = self.flows_used_dict[shift][travel_level][destination]
                             self.flows_used_dict[shift][travel_level][destination] = \
                                 max(self.flows_used_dict[shift][travel_level][destination],
                                     self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
+                            if self.flows_used_dict[shift][travel_level][destination] != orirgin_loads:
+                                self.flows_used_NC_rate_dict[shift][destination] = \
+                                    self.date_shift_destination_NC_rate[date][shift][destination]
         return self.flows_used_dict

@@ -51,7 +51,8 @@ class MODEL(object):
                 for destination in self.flow_info.flows_used_dict[shift][travel_level]:
                     loads = self.flow_info.flows_used_dict[shift][travel_level][destination]
                     zone = self.flow_info.travel_level_destination_zone_dict[travel_level][destination]
-                    self.shift_flowBands[shift].append(FLOW(destination, travel_level, loads, zone))
+                    NC_rate = self.flow_info.flows_used_NC_rate_dict[shift][destination]
+                    self.shift_flowBands[shift].append(FLOW(destination, travel_level, loads, zone, NC_rate))
         self.shift_flowBands_mean_loads = {}
         self.shift_flowBands_all_loads = {}
         for shift in self.flow_info.shift_travel_level_zone.keys():
@@ -72,8 +73,9 @@ class MODEL(object):
                 for destination in self.flow_info.flows_used_dict[shift][travel_level]:
                     loads = self.flow_info.flows_used_dict[shift][travel_level][destination]
                     zone = self.flow_info.travel_level_destination_zone_dict[travel_level][destination]
+                    NC_rate = self.flow_info.flows_used_NC_rate_dict[shift][destination]
                     self.shift_travel_level_flowBands[shift][travel_level].append(
-                        FLOW(destination, travel_level, loads, zone))
+                        FLOW(destination, travel_level, loads, zone, NC_rate))
         self.shift_travel_level_flowBands_mean_loads = {}
         self.shift_travel_level_flowBands_all_loads = {}
         for shift in self.flow_info.shift_travel_level_zone.keys():
@@ -99,8 +101,9 @@ class MODEL(object):
                 for destination in self.flow_info.flows_used_dict[shift][travel_level]:
                     loads = self.flow_info.flows_used_dict[shift][travel_level][destination]
                     zone = self.flow_info.travel_level_destination_zone_dict[travel_level][destination]
+                    NC_rate = self.flow_info.flows_used_NC_rate_dict[shift][destination]
                     self.shift_travel_level_zone_flowBands[shift][travel_level][zone]. \
-                        append(FLOW(destination, travel_level, loads, zone))
+                        append(FLOW(destination, travel_level, loads, zone, NC_rate))
         self.shift_travel_level_zone_flowBands_mean_loads = {}
         self.shift_travel_level_zone_flowBands_all_loads = {}
         for shift in self.flow_info.shift_travel_level_zone.keys():
@@ -317,7 +320,8 @@ class MODEL(object):
                     loads = self.flow_info.flows_used_dict[shift][travel_level][destination]
                 num = len(set(encoding_record['record_flow_sorting_sation'][destination]))
                 loads = loads / num
-                new_flow = FLOW(destination, travel_level, loads, zone)
+                NC_rate = flow.NC_rate
+                new_flow = FLOW(destination, travel_level, loads, zone, NC_rate)
                 temp_flow_list.append(new_flow)
             temp_flowBand = FLOWBAND(temp_flow_list)
             self.flow_Bands.append(temp_flowBand)

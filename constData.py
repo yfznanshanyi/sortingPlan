@@ -98,3 +98,4 @@ class CONSTDATA(object):
     travel_level_num_lb = 5
     # NC rate
     default_NC_rate = 0.0
+    NC_rate_up_bound = 0.3
