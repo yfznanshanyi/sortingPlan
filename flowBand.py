@@ -10,8 +10,9 @@ class FLOWBAND(object):
         self.flow_dict = {}
         self.loads = 0
         self.mean_loads = 0
-        self.mean_loads_no_NC = 0
         self.loads_no_NC = 0
+        self.mean_loads_no_NC = 0
+        self.loads_NC = 0
         self.mean_loads_NC = 0
         self.set_basic_data()
 
@@ -38,11 +39,16 @@ class FLOWBAND(object):
         self.set_loads()
         self.set_no_NC_loads()
         self.set_NC_loads()
-        self.set_flow_dict()
+        # self.set_flow_dict()
 
     def get_loads(self):
-        self.set_loads()
-        return self.loads
+        return self.set_loads()
+
+    def get_no_NC_loads(self):
+        return self.set_no_NC_loads()
+
+    def get_NC_loads(self):
+        return self.set_NC_loads()
 
     # 单个大流向分解
     def split_big_flow(self, sorting_sation_weight, sorting_sation_num_ub):
@@ -60,6 +66,8 @@ class FLOWBAND(object):
             for i in range(split_num):
                 flow = copy.copy(self.flow_list[0])
                 flow.loads = mean_loads
+                flow.set_loads_NC()
+                flow.set_loads_no_NC()
                 temp_flowBands_list.append(FLOWBAND([flow]))
             # print(self.flow_list[0].destination,len(temp_flowBands_list))
             return temp_flowBands_list

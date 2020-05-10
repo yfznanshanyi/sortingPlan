@@ -12,9 +12,19 @@ class FLOW(object):
         self.loads = loads
         self.zone = zone
         self.NC_rate = NC_rate
-        self.loads_no_NC = self.loads * (1.0 - self.NC_rate)
-        self.loads_NC = self.loads * self.NC_rate
+        self.loads_no_NC = 0.0
+        self.loads_NC = 0.0
+        self.set_loads_NC()
+        self.set_loads_no_NC()
         # self.trunk_num = trunk_num
+
+    def set_loads_no_NC(self):
+        self.loads_no_NC = self.loads * (1.0 - self.NC_rate)
+        return self.loads_no_NC
+
+    def set_loads_NC(self):
+        self.loads_NC = self.loads * self.NC_rate
+        return self.loads_NC
 
     def __lt__(self, other):
         if self.loads < other.loads:
@@ -166,7 +176,7 @@ class FLOWINFO(object):
         df_NC_rate.to_csv('df_NC_rate.csv',index=False)
         return df_NC_rate
 
-    def set_date_shift_destination_NC_rate(self):
+    def set_default_NC_rate(self):
         self.date_shift_destination_NC_rate = {}
         for date in self.date_list:
             self.date_shift_destination_NC_rate[date] = {}
@@ -174,11 +184,17 @@ class FLOWINFO(object):
                 self.date_shift_destination_NC_rate[date][shift] = {}
                 for destination in self.destination_list:
                     self.date_shift_destination_NC_rate[date][shift][destination] = 0.0
-        for r,c in self.input_data.NC_rate.iterrows():
+        return self.date_shift_destination_NC_rate
+
+    def set_date_shift_destination_NC_rate(self):
+        NC_rate_df = copy.copy(self.input_data.NC_rate[self.input_data.NC_rate['date'].isin(self.date_list)])
+        for r,c in NC_rate_df.iterrows():
             date = c['date']
             shift = c['shift']
             destination = c['destination']
             NC_rate = c['NC_rate']
+            if date not in self.date_shift_destination_NC_rate.keys():
+                continue
             self.date_shift_destination_NC_rate[date][shift][destination] = NC_rate
         return self.date_shift_destination_NC_rate
 
@@ -193,6 +209,7 @@ class FLOWINFO(object):
         self.set_travel_level_destination_zone_dict()
         self.set_shift_travel_level_zone()
         # self.generate_date_shift_destination_NC_rate()
+        self.set_default_NC_rate()
         self.set_date_shift_destination_NC_rate()
 
     def set_big_shift_split_rate(self):

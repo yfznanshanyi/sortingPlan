@@ -17,6 +17,8 @@ class CONSTDATA(object):
     pallets_width = 1.0
     # kilogram
     kg_t = 1000.0
+    # kilometer
+    km_m = 1000.0
     # man efficiency
     x_max = 75
     x_min = 0

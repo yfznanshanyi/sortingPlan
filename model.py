@@ -199,18 +199,18 @@ class MODEL(object):
         self.encoding = copy.copy(encoding)
         return encoding
 
-    def cost_main_line(self, encoding, NC_rate=0.0):
+    def cost_main_line(self, encoding):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_sorting_sation'].items():
-            weight = flowBand.get_loads() * (1.0 - NC_rate) / CONSTDATA.kg_t
+            weight = flowBand.get_no_NC_loads()  / CONSTDATA.kg_t
             distance = self.main_line_distance_list[index] + CONSTDATA.before_main_line_distance
             weight_distance = weight_distance + weight * distance
         return weight_distance
 
-    def cost_sorting_sation_2_storage_area(self, encoding, NC_rate=0.0):
+    def cost_sorting_sation_2_storage_area(self, encoding):
         weight_distance = 0.0
         for flowBand, sorting_sation_index in encoding['encoding_flow_sorting_sation'].items():
-            weight = flowBand.get_loads() * (1.0 - NC_rate)
+            weight = flowBand.get_no_NC_loads()
             pallet = weight / CONSTDATA.pallets_weight
             # print(flowBand.flow_list[0].destination)
             storage_area_index = encoding['encoding_flow_loading_berth'][flowBand]
@@ -219,43 +219,43 @@ class MODEL(object):
         weight_distance = weight_distance * 2
         return weight_distance
 
-    def cost_storage_area_2_loading_berth(self, encoding, NC_rate=0.0):
+    def cost_storage_area_2_loading_berth(self, encoding):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.get_loads() * (1 - NC_rate)
+            weight = flowBand.get_no_NC_loads()
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.storage_area_2_loading_berth_distance_matrix[index][index]
             weight_distance = weight_distance + pallet * distance
         weight_distance = weight_distance * 2
         return weight_distance
 
-    def cost_NC_loading_berth_2_storage_area(self, encoding, NC_rate=0.0):
+    def cost_NC_loading_berth_2_storage_area(self, encoding):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.get_loads() * NC_rate
+            weight = flowBand.get_NC_loads()
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.NC_loading_berth_2_storage_area_distance_list[index]
             weight_distance = weight_distance + pallet * distance
         weight_distance = weight_distance * 2
         return weight_distance
 
-    def cost_NC_storage_area_2_loading_berth(self, encoding, NC_rate=0.0):
+    def cost_NC_storage_area_2_loading_berth(self, encoding):
         weight_distance = 0.0
         for flowBand, index in encoding['encoding_flow_loading_berth'].items():
-            weight = flowBand.get_loads() * NC_rate
+            weight = flowBand.get_NC_loads()
             pallet = weight / CONSTDATA.pallets_weight
             distance = self.storage_area_2_loading_berth_distance_matrix[index][index]
             weight_distance = weight_distance + pallet * distance
         weight_distance = weight_distance * 2
         return weight_distance
 
-    def decoding(self, encoding, NC_rate=0.0):
+    def decoding(self, encoding):
         fit = {}
-        fit['main_line'] = self.cost_main_line(encoding, NC_rate)
-        fit['sorting_sation_2_storage_area'] = self.cost_sorting_sation_2_storage_area(encoding, NC_rate)
-        fit['storage_area_2_loading_berth'] = self.cost_storage_area_2_loading_berth(encoding, NC_rate)
-        fit['NC_loading_berth_2_storage_area'] = self.cost_NC_loading_berth_2_storage_area(encoding, NC_rate)
-        fit['NC_storage_area_2_loading_berth'] = self.cost_NC_storage_area_2_loading_berth(encoding, NC_rate)
+        fit['main_line'] = self.cost_main_line(encoding)
+        fit['sorting_sation_2_storage_area'] = self.cost_sorting_sation_2_storage_area(encoding)
+        fit['storage_area_2_loading_berth'] = self.cost_storage_area_2_loading_berth(encoding)
+        fit['NC_loading_berth_2_storage_area'] = self.cost_NC_loading_berth_2_storage_area(encoding)
+        fit['NC_storage_area_2_loading_berth'] = self.cost_NC_storage_area_2_loading_berth(encoding)
         return fit
 
     def set_encoding(self, encoding):
@@ -316,11 +316,12 @@ class MODEL(object):
                 zone = flow.zone
                 if destination not in self.flow_info.flows_used_dict[shift][travel_level].keys():
                     loads = 0
+                    NC_rate = 0.0
                 else:
                     loads = self.flow_info.flows_used_dict[shift][travel_level][destination]
+                    NC_rate = self.flow_info.flows_used_NC_rate_dict[shift][destination]
                 num = len(set(encoding_record['record_flow_sorting_sation'][destination]))
                 loads = loads / num
-                NC_rate = flow.NC_rate
                 new_flow = FLOW(destination, travel_level, loads, zone, NC_rate)
                 temp_flow_list.append(new_flow)
             temp_flowBand = FLOWBAND(temp_flow_list)

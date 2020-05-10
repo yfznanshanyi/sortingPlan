@@ -25,9 +25,9 @@ if __name__ == '__main__':
     dynamicBerths.set_day_sort_plan()
     dynamicBerths.set_compare_fit()
     dynamicBerths.set_compare_encoding()
-    # dynamicBerths.set_no_NC_figure()
-    # dynamicBerths.plot_no_NC_zone_loads()
-    # dynamicBerths.analysis_no_NC_zone_loads()
+    dynamicBerths.set_no_NC_figure()
+    dynamicBerths.plot_no_NC_zone_loads()
+    dynamicBerths.analysis_no_NC_zone_loads()
 
 
     print('end: ', time.process_time() - start)

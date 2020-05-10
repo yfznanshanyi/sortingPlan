@@ -1,14 +1,15 @@
 import copy
+import itertools
 
 from constData import CONSTDATA
 from flowBand import FLOWBAND
 
 
 class ALGS(object):
-    def __init__(self, model,NC_label=False,encoding='',encoding_record=''):
+    def __init__(self, model, NC_label=True, encoding='', encoding_record=''):
         self.model = copy.copy(model)
         self.model.initliza_encoding()
-        if len(encoding_record)==0:
+        if len(encoding_record) == 0:
             if NC_label == False:
                 self.set_big_shift_travel_level1()
                 encoding = self.set_big_shift_travel_level23()
@@ -16,10 +17,10 @@ class ALGS(object):
                 self.NC_set_big_shift_travel_level1()
                 encoding = self.set_big_shift_travel_level23()
         else:
-            self.model.set_other_encoding(encoding,encoding_record)
+            self.model.set_other_encoding(encoding, encoding_record)
             encoding = self.model.encoding
-        self.model.fit = self.model.decoding(encoding, CONSTDATA.default_NC_rate)
-
+        self.model.fit = self.model.decoding(encoding)
+    # no NC sorted
     def sort_flowBand_list(self, flowBand_list, order=0):
         temp_flowBand_list = copy.copy(flowBand_list)
         temp_flowBand_list.sort()
@@ -56,7 +57,7 @@ class ALGS(object):
         temp_flows_list = copy.copy(self.model.shift_travel_level_flowBands[shift][travel_level])
         temp_zone_flowBands = []
         for zone, flow_list in self.model.shift_travel_level_zone_flowBands[shift][travel_level].items():
-            if len(flow_list) ==0:
+            if len(flow_list) == 0:
                 continue
             temp_zone_flowBands.append(FLOWBAND(copy.copy(flow_list)))
         temp_zone_flowBands.sort(key=lambda x: x.mean_loads, reverse=True)
@@ -83,7 +84,7 @@ class ALGS(object):
                     sorting_sation_flowBands.extend(ttemp)
                     loading_berth_flowBands.append(ttemp)
         # set algorithm encoding
-        encoding = copy.copy(self.model.encoding)
+        encoding = copy.copy(self.model.initliza_encoding())
         for flowBand, sorting_sation_index in zip(sorting_sation_flowBands,
                                                   self.model.sorting_sation_set.short_side_index):
             encoding['encoding_flow_sorting_sation'][flowBand] = sorting_sation_index
@@ -183,7 +184,49 @@ class ALGS(object):
         # self.model.show_encoding()
         return encoding
 
-    # 考虑NC件，设置大班次一级干线流向
+    # 考虑NC件，对一级干线各区域进行排序
+    def set_zone_fit(self, ss_zone_flowBand, lb_zone_flowBand, ss_begin_index, lb_begin_index):
+        encoding = copy.copy(self.model.initliza_encoding())
+        temp_ss_index = [ss_begin_index + _ for _ in range(len(ss_zone_flowBand))]
+        # print(temp_ss_index)
+        temp_lb_index = [lb_begin_index + _ for _ in range(len(lb_zone_flowBand))]
+
+        for flowBand, sorting_sation_index in zip(ss_zone_flowBand, temp_ss_index):
+            encoding['encoding_flow_sorting_sation'][flowBand] = sorting_sation_index
+        for flowBand, loading_berth_index in zip(lb_zone_flowBand, temp_lb_index):
+            if type(flowBand) == list:
+                for subflowBand in flowBand:
+                    encoding['encoding_flow_loading_berth'][subflowBand] = loading_berth_index
+            else:
+                encoding['encoding_flow_loading_berth'][flowBand] = loading_berth_index
+        fit = copy.copy(self.model.decoding(encoding))
+        for f in fit.keys():
+            fit[f] = fit[f] / len(ss_zone_flowBand)
+        return fit
+
+    def NC_sort_flowBand_list(self, NC_ss_zone_flowBands, NC_lb_zone_flowBands):
+        temp_NC_ss_zone_flowBands = copy.copy(NC_ss_zone_flowBands)
+        temp_NC_lb_zone_flowBands = copy.copy(NC_lb_zone_flowBands)
+        cur_ss_index = 0
+        cur_lb_index = 0
+        sorted_ss_zone_flowBand_list = []
+        sorted_lb_zone_flowBand_list = []
+        zone_index_list = [_ for _ in range(len(temp_NC_ss_zone_flowBands))]
+        for i in range(len(NC_ss_zone_flowBands)):
+            temp_fit_list = [self.set_zone_fit(temp_NC_ss_zone_flowBands[_], temp_NC_lb_zone_flowBands[_],
+                                               cur_ss_index, cur_lb_index) for _ in range(len(temp_NC_ss_zone_flowBands))]
+            temp_compare_fit_list = [fit['sorting_sation_2_storage_area'] + fit['NC_loading_berth_2_storage_area']
+                             for fit in temp_fit_list]
+            zone_index = temp_compare_fit_list.index(max(temp_compare_fit_list))
+            zone_index_list.remove(zone_index_list[zone_index])
+            sorted_ss_zone_flowBand_list.append(copy.copy(temp_NC_ss_zone_flowBands[zone_index]))
+            sorted_lb_zone_flowBand_list.append(copy.copy(temp_NC_lb_zone_flowBands[zone_index]))
+            temp_NC_ss_zone_flowBands.remove(temp_NC_ss_zone_flowBands[zone_index])
+            temp_NC_lb_zone_flowBands.remove(temp_NC_lb_zone_flowBands[zone_index])
+            cur_ss_index = cur_ss_index + len(sorted_ss_zone_flowBand_list[-1])
+            cur_lb_index = cur_lb_index + len(sorted_lb_zone_flowBand_list[-1])
+        return sorted_ss_zone_flowBand_list, sorted_lb_zone_flowBand_list
+
     def NC_set_big_shift_travel_level1(self):
         shift = self.model.flow_info.big_shift
         shift_mean_loads = self.model.shift_flowBands_mean_loads[shift]
@@ -199,34 +242,39 @@ class ALGS(object):
         temp_flows_list = copy.copy(self.model.shift_travel_level_flowBands[shift][travel_level])
         temp_zone_flowBands = []
         for zone, flow_list in self.model.shift_travel_level_zone_flowBands[shift][travel_level].items():
-            if len(flow_list) ==0:
+            if len(flow_list) == 0:
                 continue
             temp_zone_flowBands.append(FLOWBAND(copy.copy(flow_list)))
-        temp_zone_flowBands.sort(key=lambda x: x.mean_loads, reverse=True)
-        sorting_sation_flowBands = []
-        loading_berth_flowBands = []
+        temp_zone_flowBands.sort(key=lambda x: x.mean_loads_no_NC, reverse=True)
         label = 1
+        temp_NC_ss_zone_flowBands = []
+        temp_NC_lb_zone_flowBands = []
         for flowBand in temp_zone_flowBands:
-            # temp = flowBand.set_combined_flowBands(shift_travel_level_mean_loads,
-            #                                        CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
-            temp = flowBand.set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
-                                                   CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
+            temp_NC_ss_zone_flowBands.append([])
+            temp_NC_lb_zone_flowBands.append([])
+            temp = flowBand.NC_set_combined_flowBands(CONSTDATA.sorting_sation_loads_ub,
+                                                      CONSTDATA.sorting_sation_travel_level1_combine_rate_ub)
             temp.sort(reverse=True)
             label = label + len(temp)
             temp = self.sort_flowBand_list(temp, label % 2)
             for flowBand in temp:
-                # ttemp = flowBand.split_big_flow(shift_travel_level_mean_loads,
-                #                                 CONSTDATA.sorting_sation_travel_level1_num_ub)
-                ttemp = flowBand.split_big_flow(CONSTDATA.sorting_sation_loads_ub,
-                                                CONSTDATA.sorting_sation_travel_level1_num_ub)
+                ttemp = flowBand.NC_split_big_flow(CONSTDATA.sorting_sation_loads_ub,
+                                                   CONSTDATA.sorting_sation_travel_level1_num_ub)
                 if ttemp == -1:
-                    sorting_sation_flowBands.append(flowBand)
-                    loading_berth_flowBands.append(flowBand)
+                    temp_NC_ss_zone_flowBands[-1].append(flowBand)
+                    temp_NC_lb_zone_flowBands[-1].append(flowBand)
                 else:
-                    sorting_sation_flowBands.extend(ttemp)
-                    loading_berth_flowBands.append(ttemp)
+                    temp_NC_ss_zone_flowBands[-1].extend(ttemp)
+                    temp_NC_lb_zone_flowBands[-1].append(ttemp)
+        temp_sorting_sation_flowBands,temp_loading_berth_flowBands = self.NC_sort_flowBand_list(temp_NC_ss_zone_flowBands, temp_NC_lb_zone_flowBands)
+        sorting_sation_flowBands = []
+        loading_berth_flowBands = []
+        for ss_flowBand in temp_sorting_sation_flowBands:
+            sorting_sation_flowBands.extend(ss_flowBand)
+        for ss_flowBand in temp_loading_berth_flowBands:
+            loading_berth_flowBands.extend(ss_flowBand)
         # set algorithm encoding
-        encoding = copy.copy(self.model.encoding)
+        encoding = copy.copy(self.model.initliza_encoding())
         for flowBand, sorting_sation_index in zip(sorting_sation_flowBands,
                                                   self.model.sorting_sation_set.short_side_index):
             encoding['encoding_flow_sorting_sation'][flowBand] = sorting_sation_index
