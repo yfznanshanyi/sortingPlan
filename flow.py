@@ -52,7 +52,7 @@ class FLOW(object):
 
 
 class FLOWINFO(object):
-    def __init__(self, input_date, split_label):
+    def __init__(self, input_date, split_label,NC_label):
         self.input_data = copy.copy(input_date)
         self.date_list = []
         self.shift_list = []
@@ -67,7 +67,7 @@ class FLOWINFO(object):
         self.flows_used_NC_rate_dict = {}
         self.shift_travel_level_zone = {}
         self.date_shift_destination_NC_rate = {}
-        self.set_basic_data()
+        self.set_basic_data(NC_label)
 
         # set split rate
         self.big_shift = '755VF2200'
@@ -198,7 +198,7 @@ class FLOWINFO(object):
             self.date_shift_destination_NC_rate[date][shift][destination] = NC_rate
         return self.date_shift_destination_NC_rate
 
-    def set_basic_data(self):
+    def set_basic_data(self,NC_label):
         self.set_date_list()
         self.set_shift_list()
         self.set_zone_list()
@@ -210,7 +210,8 @@ class FLOWINFO(object):
         self.set_shift_travel_level_zone()
         # self.generate_date_shift_destination_NC_rate()
         self.set_default_NC_rate()
-        self.set_date_shift_destination_NC_rate()
+        if NC_label==True:
+            self.set_date_shift_destination_NC_rate()
 
     def set_big_shift_split_rate(self):
         # default shift

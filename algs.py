@@ -6,7 +6,7 @@ from flowBand import FLOWBAND
 
 
 class ALGS(object):
-    def __init__(self, model, NC_label=True, encoding='', encoding_record=''):
+    def __init__(self, model, NC_label=False, encoding='', encoding_record=''):
         self.model = copy.copy(model)
         self.model.initliza_encoding()
         if len(encoding_record) == 0:
