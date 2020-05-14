@@ -70,9 +70,9 @@ class FLOWINFO(object):
         self.set_basic_data(NC_label)
 
         # set split rate
-        self.big_shift = '755VF2200'
+        self.big_shift = '755VF1401'
         self.big_shift_split_rate = {}
-        if split_label == 1:
+        if split_label == True:
             self.set_big_shift_split_rate()
 
         # set flows used

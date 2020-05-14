@@ -19,7 +19,7 @@ class DYNAMICBERTHS(object):
         self.after_encoding_list = []
         self.before_fit_list = []
         self.after_fit_list = []
-        self.flow_info = FLOWINFO(self.data, 1,False)
+        self.flow_info = FLOWINFO(self.data, False,False)
         self.model = MODEL(self.flow_info)
         self.encoding = {}
         self.fit = {}
@@ -32,7 +32,7 @@ class DYNAMICBERTHS(object):
         self.NC_after_encoding_list = []
         self.NC_before_fit_list = []
         self.NC_after_fit_list = []
-        self.NC_flow_info = FLOWINFO(self.data, 1,True)
+        self.NC_flow_info = FLOWINFO(self.data, True,True)
         self.NC_model = MODEL(self.NC_flow_info)
         self.NC_encoding = {}
         self.NC_fit = {}
@@ -370,7 +370,7 @@ class DYNAMICBERTHS(object):
                                                        index=['date', 'travel_level'],
                                                        fill_value=0, aggfunc='sum')
         temp_travel_level3_zone_loads.reset_index(inplace=True)
-        temp_travel_level3_zone_loads['zone'] = 'K775Y&755Y'
+        temp_travel_level3_zone_loads['zone'] = 'K755Y&755Y'
         travel_level3_zone_loads = temp_travel_level3_zone_loads[travel_level3_zone_loads.columns]
         travel_level23_zone_loads = travel_level2_zone_loads.append(travel_level3_zone_loads)
 
@@ -499,7 +499,7 @@ class DYNAMICBERTHS(object):
         temp_travel_level1_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '一级运输'])
         temp_travel_level2_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '二级运输'])
         temp_travel_level3_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '三级运输'])
-        temp_travel_level3_zone_loads['zone'] = ''  # 'K775Y&755Y')
+        temp_travel_level3_zone_loads['zone'] = ''  # 'K755Y&755Y')
         temp_zone_loads = \
             pd.concat([temp_travel_level1_zone_loads, temp_travel_level2_zone_loads, temp_travel_level3_zone_loads])
         temp_zone_loads['zone'] = temp_zone_loads['travel_level'] + temp_zone_loads['zone']

@@ -13,11 +13,11 @@ if __name__ == '__main__':
     data_list = ['20200301-20200325', '20200402-20200408', '20200401-20200416','20200301-20200429']
     input_data = INPUTDATA(input_file + data_list[3] + '/')
 
-    # flow_info = FLOWINFO(input_data,1)
-    # model = MODEL(flow_info)
-    # algs = ALGS(model)
-    # # algs.model.show_encoding()
-    # # algs.model.show_fit()
+    flow_info = FLOWINFO(input_data,False,False)
+    model = MODEL(flow_info)
+    algs = ALGS(model)
+    algs.model.show_encoding()
+    algs.model.show_fit()
     # encoding_record = algs.model.set_encoding_record()
 
     # dynamic loading berths
