@@ -46,8 +46,8 @@ class ALGS(object):
         shift = self.model.flow_info.big_shift
         shift_mean_loads = self.model.shift_flowBands_mean_loads[shift]
         travel_level = '一级运输'
-        if travel_level not in self.model.shift_flowBands_mean_loads.keys():
-            return copy.copy(self.model.initliza_encoding())
+        # if travel_level not in self.model.shift_flowBands_mean_loads.keys():
+        #     return copy.copy(self.model.initliza_encoding())
         shift_travel_level_mean_loads = self.model.shift_travel_level_flowBands_mean_loads[shift][travel_level]
         rate = self.model.shift_travel_level_flowBands_all_loads[shift][travel_level] / \
                self.model.shift_flowBands_all_loads[shift]
