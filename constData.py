@@ -78,9 +78,7 @@ class CONSTDATA(object):
     # distance
     before_main_line_distance = 122.8412
     # big flow
-    # sorting_sation_loads_ub = 30000
-    sorting_sation_loads_ub = 20000
-    # sorting_sation_loads_ub = 12000
+    sorting_sation_loads_ub = 30000
 
     sorting_sation_travel_level1_combine_rate_ub = 1.5
     sorting_sation_travel_level1_split_rate_lb = 2.0

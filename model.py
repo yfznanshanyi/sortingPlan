@@ -306,7 +306,6 @@ class MODEL(object):
         return self.fit
 
     def set_other_encoding(self, encoding, encoding_record):
-        # shift = '755VF1401'
         shift = '755VF2200'
         self.flow_Bands = []
         for flowBand, sorting_sation_index in encoding['encoding_flow_sorting_sation'].items():

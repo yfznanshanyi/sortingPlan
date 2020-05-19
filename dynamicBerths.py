@@ -45,7 +45,7 @@ class DYNAMICBERTHS(object):
 
     def set_day_sort_plan(self, duration=0):
         self.record_date_list = []
-        flow_info = FLOWINFO(self.data, 1, False)
+        flow_info = FLOWINFO(self.data, True, False)
         model = MODEL(flow_info)
         algs = ALGS(model)
         self.encoding = algs.model.encoding
@@ -68,7 +68,7 @@ class DYNAMICBERTHS(object):
             self.record_date_list.append(date_list)
             temp_input_data = copy.copy(self.data)
             temp_input_data.set_date(date_list)
-            flow_info = FLOWINFO(temp_input_data, 1,False)
+            flow_info = FLOWINFO(temp_input_data, False,False)
             model = MODEL(flow_info)
             algs = ALGS(model)
             self.before_encoding_list.append(algs.model.encoding)
@@ -128,6 +128,7 @@ class DYNAMICBERTHS(object):
         self.comprea_info_fit['after storage_area_2_loading_berth'] = after_sa_2_lb
         self.comprea_info_fit['after NC_loading_berth_2_storage_area'] = after_NC_lb_2_sa
         self.comprea_info_fit['after NC_storage_area_2_loading_berth'] = after_NC_sa_2_lb
+        self.comprea_info_fit['loads'] = self.loads_list
         if label == True:
             self.comprea_info_fit.to_csv(self.data.output_filefolder + 'comprea_info_fit.csv', index=False)
         return self.comprea_info_fit
@@ -370,7 +371,7 @@ class DYNAMICBERTHS(object):
                                                        index=['date', 'travel_level'],
                                                        fill_value=0, aggfunc='sum')
         temp_travel_level3_zone_loads.reset_index(inplace=True)
-        temp_travel_level3_zone_loads['zone'] = 'K755Y&755Y'
+        temp_travel_level3_zone_loads['zone'] = 'K775Y&755Y'
         travel_level3_zone_loads = temp_travel_level3_zone_loads[travel_level3_zone_loads.columns]
         travel_level23_zone_loads = travel_level2_zone_loads.append(travel_level3_zone_loads)
 
@@ -499,7 +500,7 @@ class DYNAMICBERTHS(object):
         temp_travel_level1_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '一级运输'])
         temp_travel_level2_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '二级运输'])
         temp_travel_level3_zone_loads = copy.copy(temp_zone_loads[temp_zone_loads['travel_level'] == '三级运输'])
-        temp_travel_level3_zone_loads['zone'] = ''  # 'K755Y&755Y')
+        temp_travel_level3_zone_loads['zone'] = ''  # 'K775Y&755Y')
         temp_zone_loads = \
             pd.concat([temp_travel_level1_zone_loads, temp_travel_level2_zone_loads, temp_travel_level3_zone_loads])
         temp_zone_loads['zone'] = temp_zone_loads['travel_level'] + temp_zone_loads['zone']
@@ -524,8 +525,8 @@ class DYNAMICBERTHS(object):
 
     def no_NC_plots(self):
         self.set_day_sort_plan()
-        self.set_compare_fit()
         self.set_compare_encoding()
+        self.set_compare_fit()
         self.set_no_NC_figure()
         self.plot_no_NC_zone_loads()
         self.analysis_no_NC_zone_loads()
@@ -533,7 +534,7 @@ class DYNAMICBERTHS(object):
     # consider NC
     def NC_set_day_sort_plan(self, duration=0):
         self.NC_record_date_list = []
-        flow_info = FLOWINFO(self.data, 1,True)
+        flow_info = FLOWINFO(self.data, True,True)
         model = MODEL(flow_info)
         algs = ALGS(model, True)
         self.NC_encoding = algs.model.encoding
@@ -553,7 +554,7 @@ class DYNAMICBERTHS(object):
             self.NC_record_date_list.append(date_list)
             temp_input_data = copy.copy(self.data)
             temp_input_data.set_date(date_list)
-            flow_info = FLOWINFO(temp_input_data, 1,True)
+            flow_info = FLOWINFO(temp_input_data, True,True)
             model = MODEL(flow_info)
             algs = ALGS(model, True)
             self.NC_before_encoding_list.append(algs.model.encoding)
@@ -610,6 +611,7 @@ class DYNAMICBERTHS(object):
         self.NC_comprea_info_fit['after storage_area_2_loading_berth'] = after_sa_2_lb
         self.NC_comprea_info_fit['after NC_loading_berth_2_storage_area'] = after_NC_lb_2_sa
         self.NC_comprea_info_fit['after NC_storage_area_2_loading_berth'] = after_NC_sa_2_lb
+        self.NC_comprea_info_fit['loads'] = self.loads_list
         if label == True:
             self.NC_comprea_info_fit.to_csv(self.data.output_filefolder + 'NC_comprea_info_fit.csv', index=False)
         return self.NC_comprea_info_fit
@@ -922,6 +924,6 @@ class DYNAMICBERTHS(object):
 
     def NC_plots(self):
         self.NC_set_day_sort_plan()
-        self.NC_set_compare_fit()
         self.NC_set_compare_encoding()
+        self.NC_set_compare_fit()
         self.set_NC_figure()
