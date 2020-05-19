@@ -252,6 +252,7 @@ class FLOWINFO(object):
             for travel_level in self.travel_level_list:
                 self.flows_used_dict[shift][travel_level] = {}
                 self.flows_used_NC_rate_dict[shift][travel_level] = {}
+        # max loads
         # for date in self.date_list:
         #     for shift in self.shift_list:
         #         for travel_level in self.travel_level_list:
