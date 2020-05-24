@@ -102,6 +102,7 @@ class CONSTDATA(object):
     default_NC_rate = 0.0
     NC_rate_up_bound = 0.3
 
+<<<<<<< HEAD
     default_NC_rate = 0.3
 
     # cost Rate
@@ -122,3 +123,9 @@ class CONSTDATA(object):
     driver_per_period = 11 # h
 
     sorting_per_cost = 200 # 6000 month
+=======
+    # cost Rate
+    main_line_cost_rate = 0.3
+    ss_2_sa_cost_rate = 0.4
+    sa_2_lb_cost_rate = 0.3
+>>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef

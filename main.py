@@ -26,6 +26,6 @@ if __name__ == '__main__':
     # no NC functions
     # dynamicBerths.no_NC_plots()
     # NC functions
-    dynamicBerths.NC_plots()
+    # dynamicBerths.NC_plots()
 
     print('end: ', time.process_time() - start)
