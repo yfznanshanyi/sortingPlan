@@ -12,7 +12,7 @@ class CONSTDATA(object):
     average_weight_per_package = 25
     average_piece_per_person = 6.87
     # pallets data
-    pallets_weight = 200
+    pallets_weight = 250
     pallets_length = 1.2
     pallets_width = 1.0
     # kilogram
@@ -101,3 +101,24 @@ class CONSTDATA(object):
     # NC rate
     default_NC_rate = 0.0
     NC_rate_up_bound = 0.3
+
+    default_NC_rate = 0.3
+
+    # cost Rate
+    main_line_cost_rate = 0.3
+    ss_2_sa_cost_rate = 0.4
+    sa_2_lb_cost_rate = 0.3
+
+    electricity_price = 0.1681
+
+    main_line_power = 400
+    main_line_per_power_per_dist_per_weight = 33.33
+
+    driver_per_speed = 2.79 # km/h
+    driver_per_cost = 200 # 6000 month
+
+    forklift_power = 0.8 # kw
+
+    driver_per_period = 11 # h
+
+    sorting_per_cost = 200 # 6000 month

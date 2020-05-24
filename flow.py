@@ -6,7 +6,7 @@ from constData import CONSTDATA
 
 
 class FLOW(object):
-    def __init__(self, destination, travele_level, loads, zone, NC_rate=0.0):  # , trunk_num):
+    def __init__(self, destination, travele_level, loads, zone, NC_rate=CONSTDATA.default_NC_rate):  # , trunk_num):
         self.destination = destination
         self.travel_level = travele_level
         self.loads = loads
@@ -183,7 +183,7 @@ class FLOWINFO(object):
             for shift in self.shift_list:
                 self.date_shift_destination_NC_rate[date][shift] = {}
                 for destination in self.destination_list:
-                    self.date_shift_destination_NC_rate[date][shift][destination] = 0.0
+                    self.date_shift_destination_NC_rate[date][shift][destination] = CONSTDATA.default_NC_rate
         return self.date_shift_destination_NC_rate
 
     def set_date_shift_destination_NC_rate(self):
@@ -242,34 +242,6 @@ class FLOWINFO(object):
                 c['装载重量'] * rate
         return self.date_shift_flow_travel_level_dict
 
-    # def set_flows_used_dict(self):
-    #     self.flows_used_dict = {}
-    #     self.flows_used_NC_rate_dict = {}
-    #     for shift in self.shift_list:
-    #         self.flows_used_dict[shift] = {}
-    #         self.flows_used_NC_rate_dict[shift] = {}
-    #         for travel_level in self.travel_level_list:
-    #             self.flows_used_dict[shift][travel_level] = {}
-    #             self.flows_used_NC_rate_dict[shift][travel_level] = {}
-    #     for date in self.date_list:
-    #         for shift in self.shift_list:
-    #             for travel_level in self.travel_level_list:
-    #                 for destination in self.date_shift_flow_travel_level_dict[date][shift][travel_level].keys():
-    #                     if destination not in self.flows_used_dict[shift][travel_level].keys():
-    #                         self.flows_used_dict[shift][travel_level][destination] = \
-    #                             self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]
-    #                         self.flows_used_NC_rate_dict[shift][destination] = \
-    #                             self.date_shift_destination_NC_rate[date][shift][destination]
-    #                     else:
-    #                         orirgin_loads = self.flows_used_dict[shift][travel_level][destination]
-    #                         self.flows_used_dict[shift][travel_level][destination] = \
-    #                             max(self.flows_used_dict[shift][travel_level][destination],
-    #                                 self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
-    #                         if self.flows_used_dict[shift][travel_level][destination] != orirgin_loads:
-    #                             self.flows_used_NC_rate_dict[shift][destination] = \
-    #                                 self.date_shift_destination_NC_rate[date][shift][destination]
-    #     return self.flows_used_dict
-
     def set_flows_used_dict(self):
         self.flows_used_dict = {}
         self.flows_used_NC_rate_dict = {}
@@ -285,23 +257,51 @@ class FLOWINFO(object):
                     for destination in self.date_shift_flow_travel_level_dict[date][shift][travel_level].keys():
                         if destination not in self.flows_used_dict[shift][travel_level].keys():
                             self.flows_used_dict[shift][travel_level][destination] = \
-                                [self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]]
+                                self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]
                             self.flows_used_NC_rate_dict[shift][destination] = \
-                                [self.date_shift_destination_NC_rate[date][shift][destination]]
+                                self.date_shift_destination_NC_rate[date][shift][destination]
                         else:
                             orirgin_loads = self.flows_used_dict[shift][travel_level][destination]
-                            self.flows_used_dict[shift][travel_level][destination].append(
-                                self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
+                            self.flows_used_dict[shift][travel_level][destination] = \
+                                max(self.flows_used_dict[shift][travel_level][destination],
+                                    self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
                             if self.flows_used_dict[shift][travel_level][destination] != orirgin_loads:
-                                self.flows_used_NC_rate_dict[shift][destination].append(
-                                    self.date_shift_destination_NC_rate[date][shift][destination])
-        for shift in self.shift_list:
-            for travel_level in self.travel_level_list:
-                for destination in self.flows_used_dict[shift][travel_level].keys():
-                    loads = copy.copy(self.flows_used_dict[shift][travel_level][destination])
-                    mean_loads = sum(loads)/len(loads)
-                    self.flows_used_dict[shift][travel_level][destination] = mean_loads
-                    loads_no_NC = copy.copy(self.flows_used_NC_rate_dict[shift][destination])
-                    mean_loads_no_NC = sum(loads_no_NC)/len(loads_no_NC)
-                    self.flows_used_NC_rate_dict[shift][destination] = mean_loads_no_NC
+                                self.flows_used_NC_rate_dict[shift][destination] = \
+                                    self.date_shift_destination_NC_rate[date][shift][destination]
         return self.flows_used_dict
+
+    # def set_flows_used_dict(self):
+    #     self.flows_used_dict = {}
+    #     self.flows_used_NC_rate_dict = {}
+    #     for shift in self.shift_list:
+    #         self.flows_used_dict[shift] = {}
+    #         self.flows_used_NC_rate_dict[shift] = {}
+    #         for travel_level in self.travel_level_list:
+    #             self.flows_used_dict[shift][travel_level] = {}
+    #             self.flows_used_NC_rate_dict[shift][travel_level] = {}
+    #     for date in self.date_list:
+    #         for shift in self.shift_list:
+    #             for travel_level in self.travel_level_list:
+    #                 for destination in self.date_shift_flow_travel_level_dict[date][shift][travel_level].keys():
+    #                     if destination not in self.flows_used_dict[shift][travel_level].keys():
+    #                         self.flows_used_dict[shift][travel_level][destination] = \
+    #                             [self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]]
+    #                         self.flows_used_NC_rate_dict[shift][destination] = \
+    #                             [self.date_shift_destination_NC_rate[date][shift][destination]]
+    #                     else:
+    #                         orirgin_loads = self.flows_used_dict[shift][travel_level][destination]
+    #                         self.flows_used_dict[shift][travel_level][destination].append(
+    #                             self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
+    #                         if self.flows_used_dict[shift][travel_level][destination] != orirgin_loads:
+    #                             self.flows_used_NC_rate_dict[shift][destination].append(
+    #                                 self.date_shift_destination_NC_rate[date][shift][destination])
+    #     for shift in self.shift_list:
+    #         for travel_level in self.travel_level_list:
+    #             for destination in self.flows_used_dict[shift][travel_level].keys():
+    #                 loads = copy.copy(self.flows_used_dict[shift][travel_level][destination])
+    #                 mean_loads = sum(loads)/len(loads)
+    #                 self.flows_used_dict[shift][travel_level][destination] = mean_loads
+    #                 loads_no_NC = copy.copy(self.flows_used_NC_rate_dict[shift][destination])
+    #                 mean_loads_no_NC = sum(loads_no_NC)/len(loads_no_NC)
+    #                 self.flows_used_NC_rate_dict[shift][destination] = mean_loads_no_NC
+    #     return self.flows_used_dict
