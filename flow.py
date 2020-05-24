@@ -251,6 +251,25 @@ class FLOWINFO(object):
             for travel_level in self.travel_level_list:
                 self.flows_used_dict[shift][travel_level] = {}
                 self.flows_used_NC_rate_dict[shift][travel_level] = {}
+        # max loads
+        # for date in self.date_list:
+        #     for shift in self.shift_list:
+        #         for travel_level in self.travel_level_list:
+        #             for destination in self.date_shift_flow_travel_level_dict[date][shift][travel_level].keys():
+        #                 if destination not in self.flows_used_dict[shift][travel_level].keys():
+        #                     self.flows_used_dict[shift][travel_level][destination] = \
+        #                         self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination]
+        #                     self.flows_used_NC_rate_dict[shift][destination] = \
+        #                         self.date_shift_destination_NC_rate[date][shift][destination]
+        #                 else:
+        #                     orirgin_loads = self.flows_used_dict[shift][travel_level][destination]
+        #                     self.flows_used_dict[shift][travel_level][destination] = \
+        #                         max(self.flows_used_dict[shift][travel_level][destination],
+        #                             self.date_shift_flow_travel_level_dict[date][shift][travel_level][destination])
+        #                     if self.flows_used_dict[shift][travel_level][destination] != orirgin_loads:
+        #                         self.flows_used_NC_rate_dict[shift][destination] = \
+        #                             self.date_shift_destination_NC_rate[date][shift][destination]
+        # mean loads
         for date in self.date_list:
             for shift in self.shift_list:
                 for travel_level in self.travel_level_list:
