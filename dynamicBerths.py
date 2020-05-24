@@ -39,13 +39,9 @@ class DYNAMICBERTHS(object):
         self.NC_after_encoding_list = []
         self.NC_before_fit_list = []
         self.NC_after_fit_list = []
-<<<<<<< HEAD
         self.NC_ori_fit_list = []
         self.NC_mod_fit_list = []
         self.NC_flow_info = FLOWINFO(self.data, True, False)
-=======
-        self.NC_flow_info = FLOWINFO(self.data, True, True)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
         self.NC_model = MODEL(self.NC_flow_info)
         self.NC_encoding = {}
         self.NC_fit = {}
@@ -172,21 +168,12 @@ class DYNAMICBERTHS(object):
         self.comprea_info_fit['after storage_area_2_loading_berth'] = after_sa_2_lb
         self.comprea_info_fit['after NC_loading_berth_2_storage_area'] = after_NC_lb_2_sa
         self.comprea_info_fit['after NC_storage_area_2_loading_berth'] = after_NC_sa_2_lb
-<<<<<<< HEAD
         self.comprea_info_fit['origin main'] = origin_main
         self.comprea_info_fit['origin ss_2_sa'] = origin_ss_2_sa
         self.comprea_info_fit['origin sa_2_lb'] = origin_sa_2_lb
         self.comprea_info_fit['modified main'] = modified_main
         self.comprea_info_fit['modified ss_2_sa'] = modified_ss_2_sa
         self.comprea_info_fit['modified sa_2_lb'] = modified_sa_2_lb
-=======
-        self.comprea_info_fit['origin_main'] = origin_main
-        self.comprea_info_fit['origin_ss_2_sa'] = origin_ss_2_sa
-        self.comprea_info_fit['origin_sa_2_lb'] = origin_sa_2_lb
-        self.comprea_info_fit['modified_main'] = modified_main
-        self.comprea_info_fit['modified_ss_2_sa'] = modified_ss_2_sa
-        self.comprea_info_fit['modified_sa_2_lb'] = modified_sa_2_lb
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
         self.comprea_info_fit['loads'] = self.loads_list[:-1]
         if label == True:
             self.comprea_info_fit.to_csv(self.data.output_filefolder + 'comprea_info_fit.csv', index=False)
@@ -369,7 +356,6 @@ class DYNAMICBERTHS(object):
         after_ss_2_sa = self.comprea_info_fit["after sorting_sation_2_storage_area"] / CONSTDATA.km_m
         after_sa_2_lb = self.comprea_info_fit["after storage_area_2_loading_berth"] / CONSTDATA.km_m
 
-<<<<<<< HEAD
         ori_main = self.comprea_info_fit['origin main']
         ori_ss_2_sa = self.comprea_info_fit['origin ss_2_sa']
         ori_sa_2_lb = self.comprea_info_fit['origin sa_2_lb']
@@ -377,15 +363,6 @@ class DYNAMICBERTHS(object):
         mod_main = self.comprea_info_fit['modified main']
         mod_ss_2_sa = self.comprea_info_fit['modified ss_2_sa']
         mod_sa_2_lb = self.comprea_info_fit['modified sa_2_lb']
-=======
-        ori_main = self.comprea_info_fit['origin_main']
-        ori_ss_2_sa = self.comprea_info_fit['origin_ss_2_sa']
-        ori_sa_2_lb = self.comprea_info_fit['origin_sa_2_lb']
-
-        mod_main = self.comprea_info_fit['modified_main']
-        mod_ss_2_sa = self.comprea_info_fit['modified_ss_2_sa']
-        mod_sa_2_lb = self.comprea_info_fit['modified_sa_2_lb']
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
 
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 2, 1)
@@ -640,11 +617,7 @@ class DYNAMICBERTHS(object):
     # consider NC
     def NC_set_day_sort_plan(self, duration=0):
         self.NC_record_date_list = []
-<<<<<<< HEAD
         flow_info = FLOWINFO(self.data, False, False)
-=======
-        flow_info = FLOWINFO(self.data, True, True)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
         model = MODEL(flow_info)
         algs = ALGS(model, True)
         self.NC_encoding = algs.model.encoding
@@ -667,11 +640,7 @@ class DYNAMICBERTHS(object):
             self.NC_record_date_list.append(date_list)
             temp_input_data = copy.copy(self.data)
             temp_input_data.set_date(date_list)
-<<<<<<< HEAD
             flow_info = FLOWINFO(temp_input_data, False, False)
-=======
-            flow_info = FLOWINFO(temp_input_data, True, True)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
             model = MODEL(flow_info)
             algs = ALGS(model, True)
             self.NC_before_encoding_list.append(algs.model.encoding)
@@ -1162,11 +1131,7 @@ class DYNAMICBERTHS(object):
         ax2.legend(loc='lower left', fontsize=12)
         ax2.set_title('main line distance', fontsize=12)
         # ax2.set_xlabel('date',fontsize=12)
-<<<<<<< HEAD
         ax2.set_ylabel('weight_distance (t·km)', fontsize=12)
-=======
-        ax2.set_ylabel('weight_distance (km)', fontsize=12)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
 
         ax3.plot(date, before_ss_2_sa, 'ro-', label='dynamic', linewidth=2.0, ms=1)
         ax3.plot(date, after_ss_2_sa, 'ko--', label='static', linewidth=2.0, ms=1)

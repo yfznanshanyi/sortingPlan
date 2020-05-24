@@ -202,11 +202,7 @@ class CALCULATECOST(object):
         self.cost_df[main_line_cost[0]] =main_line_cost[1:]
         self.cost_df[ss_2_sa_cost[0]] =ss_2_sa_cost[1:]
         self.cost_df[sa_2_lb_cost[0]] =sa_2_lb_cost[1:]
-<<<<<<< HEAD
         # self.cost_df.to_excel(excel_writer=writer, sheet_name='costFlows', index=False)
-=======
-        self.cost_df.to_excel(excel_writer=writer, sheet_name='costFlows', index=False)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
         return self.cost_df
 
     def show_all_single_flowCost(self, writer):
@@ -215,11 +211,7 @@ class CALCULATECOST(object):
         self.mod_cost_detail = self.show_single_flowsCost_detail(self.mod_costFlows, 'modified', writer)
         self.cost_detail = pd.merge(self.ori_cost_detail,self.algs_cost_detail,how='outer')
         self.cost_detail = pd.merge(self.cost_detail,self.mod_cost_detail,how='outer')
-<<<<<<< HEAD
         # self.cost_detail.to_excel(excel_writer=writer, sheet_name='cost_detail', index=False)
-=======
-        self.cost_detail.to_excel(excel_writer=writer, sheet_name='cost_detail', index=False)
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
         self.show_single_flowCost(writer)
 
 
@@ -241,11 +233,7 @@ class CALCULATECOST(object):
         self.algs_costFlows = self.set_single_flowsCost(self.algs_costFlows)
         self.set_single_flowsCost_all(self.algs_costFlows, 'algs')
         self.algs_cost = self.cost['algs']
-<<<<<<< HEAD
         return self.algs_cost
-=======
-        return self.ori_cost
->>>>>>> 0475710aec6c8ae3c9c175b6d37c13d0996384ef
 
     def set_mod_cost(self):
         self.mod_costFlows = {}
